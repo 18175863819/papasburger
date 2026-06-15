@@ -1,0 +1,8 @@
+body, html { margin: 0; padding: 0; overflow: hidden; background-color: #000; }
+a-scene { width: 100vw; height: 100vh; }
+
+/* 加载提示的居中样式 */
+#loader {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    color: white; font-family: sans-serif; z-index: 9999;
+}

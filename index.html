@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>Papa's Burger VR - 最终演示版</title>
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v7.2.0/dist/aframe-extras.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+    
+    <style>
+        #start-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); z-index: 10000;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-family: sans-serif; cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="loader">正在加载场景，请稍候...</div>
+    <div id="start-overlay">点击屏幕进入汉堡店</div>
+
+    <a-scene renderer="antialias: true; colorManagement: true" 
+             loading-screen="dotsColor: white; backgroundColor: black"
+             webxr="optionalFeatures: hit-test, local-floor;"> 
+             
+        <a-assets timeout="10000">
+            <a-asset-item id="burger-shop" src="burger-shop.glb"></a-asset-item>
+            <audio id="bgm" src="bgm.mp3" loop></audio>
+        </a-assets>
+
+        <a-entity light="type: ambient; intensity: 0.6; color: #ffffff"></a-entity>
+        <a-entity light="type: directional; intensity: 1.0" position="2 5 2"></a-entity>
+        <a-entity light="type: directional; intensity: 0.4; color: #aaccff" position="-3 2 -2"></a-entity>
+
+        <a-entity id="sound-entity" sound="src: #bgm; autoplay: false; loop: true; volume: 0.5"></a-entity>
+
+        <a-entity gltf-model="#burger-shop" position="0 0 0" material="side: double" class="environment"></a-entity>
+
+        <a-entity id="rig" 
+                  touch-to-move="speed: 0.05"
+                  movement-controls="controls: gamepad, keyboard; speed: 0.15" 
+                  position="0 0 0">
+            
+            <a-entity id="camera" camera position="0 1.6 0" look-controls="pointerLockEnabled: false">
+                <a-entity cursor="fuse: true; fuseTimeout: 1500"
+                          position="0 0 -1"
+                          geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03"
+                          material="color: white; shader: flat; opacity: 0.5"
+                          animation__click="property: scale; startEvents: click; easing: easeInCubic; dur: 150; from: 0.1 0.1 0.1; to: 1 1 1"
+                          animation__fusing="property: scale; startEvents: fusing; easing: easeInCubic; dur: 1500; from: 1 1 1; to: 0.1 0.1 0.1"
+                          animation__mouseleave="property: scale; startEvents: mouseleave; easing: easeInCubic; dur: 500; to: 1 1 1"
+                          raycaster="objects: .interactable">
+                </a-entity>
+            </a-entity>
+
+            <a-entity laser-controls="hand: left" raycaster="objects: .interactable; far: 5"></a-entity>
+            <a-entity laser-controls="hand: right" raycaster="objects: .interactable; far: 5"></a-entity>
+            
+        </a-entity>
+    </a-scene>
+
+    <script src="main.js"></script>
+    <script>
+        document.querySelector('a-scene').addEventListener('loaded', function () {
+            document.getElementById('loader').style.display = 'none';
+        });
+
+        document.getElementById('start-overlay').addEventListener('click', function() {
+            var overlay = this;
+            
+            // 核心修复：处理 iOS 16+ 的陀螺仪权限请求
+            if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                DeviceOrientationEvent.requestPermission()
+                    .then(permissionState => {
+                        if (permissionState === 'granted') {
+                            console.log("iOS: 陀螺仪权限已获取");
+                            startGame(overlay);
+                        } else {
+                            alert("需要设备方向权限才能在手机上环顾四周哦！");
+                            startGame(overlay); // 即使拒绝也让其进入，可以靠滑动屏幕看
+                        }
+                    })
+                    .catch(console.error);
+            } else {
+                // 非 iOS 设备或旧版 iOS，直接进入
+                startGame(overlay);
+            }
+        });
+
+        function startGame(overlayElement) {
+            overlayElement.style.display = 'none';
+            var soundEntity = document.querySelector('#sound-entity');
+            if (soundEntity && soundEntity.components.sound) {
+                soundEntity.components.sound.playSound();
+            }
+        }
+    </script>
+</body>
+</html>
