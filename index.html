@@ -38,6 +38,10 @@
 
         <a-entity gltf-model="#burger-shop" position="0 0 0" material="side: double" class="environment"></a-entity>
 
+        <a-cylinder class="interactable" position="0 0.05 6" radius="0.5" height="0.05" material="color: #00ffff; opacity: 0.45; transparent: true; emissive: #00ffff" smooth-teleport="target: 0 0 6"></a-cylinder>
+        <a-cylinder class="interactable" position="0 0.05 0" radius="0.5" height="0.05" material="color: #00ffff; opacity: 0.45; transparent: true; emissive: #00ffff" smooth-teleport="target: 0 0 0"></a-cylinder>
+        <a-cylinder class="interactable" position="0 0.05 -5" radius="0.5" height="0.05" material="color: #00ffff; opacity: 0.45; transparent: true; emissive: #00ffff" smooth-teleport="target: 0 0 -5"></a-cylinder>
+
         <a-entity id="rig" 
                   touch-to-move="speed: 0.05"
                   movement-controls="controls: gamepad, keyboard; speed: 0.15" 
@@ -51,8 +55,7 @@
                           animation__click="property: scale; startEvents: click; easing: easeInCubic; dur: 150; from: 0.1 0.1 0.1; to: 1 1 1"
                           animation__fusing="property: scale; startEvents: fusing; easing: easeInCubic; dur: 1500; from: 1 1 1; to: 0.1 0.1 0.1"
                           animation__mouseleave="property: scale; startEvents: mouseleave; easing: easeInCubic; dur: 500; to: 1 1 1"
-                          raycaster="objects: .interactable">
-                </a-entity>
+                          raycaster="objects: .interactable"> </a-entity>
             </a-entity>
 
             <a-entity laser-controls="hand: left" raycaster="objects: .interactable; far: 5"></a-entity>
@@ -70,7 +73,7 @@
         document.getElementById('start-overlay').addEventListener('click', function() {
             var overlay = this;
             
-            // 核心修复：处理 iOS 16+ 的陀螺仪权限请求
+            // 请求 iOS 16+ 陀螺仪权限，确保手机端 VR 正常摇头
             if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
                 DeviceOrientationEvent.requestPermission()
                     .then(permissionState => {
@@ -79,12 +82,11 @@
                             startGame(overlay);
                         } else {
                             alert("需要设备方向权限才能在手机上环顾四周哦！");
-                            startGame(overlay); // 即使拒绝也让其进入，可以靠滑动屏幕看
+                            startGame(overlay);
                         }
                     })
                     .catch(console.error);
             } else {
-                // 非 iOS 设备或旧版 iOS，直接进入
                 startGame(overlay);
             }
         });
